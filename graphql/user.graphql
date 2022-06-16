@@ -1,0 +1,80 @@
+type User {
+    id: ID!
+    name: String!
+    email: String
+    phone: String
+    email_verified_at: DateTime
+    created_at: DateTime!
+    updated_at: DateTime!
+    images: [Image]! @morphMany
+}
+enum ProviderType {
+    FACEBOOK
+    GOOGLE
+}
+
+type LoginResponse {
+    token: String!
+    user: User
+}
+input editProfileInput {
+    name: String
+    email: String
+}
+
+extend type Query {
+    me: User @auth(guard: "sanctum")
+}
+extend type Mutation {
+    register(
+        name: String
+        password: String
+        email: String
+        password_confirmation: String
+    ): LoginResponse!
+        @validator(class: "RegisterValidator")
+        @field(resolver: "UserMutator@register")
+
+    login(email: String!, password: String!): LoginResponse
+        @field(resolver: "UserMutator@login")
+
+    logout: String
+        @guard(with: "sanctum")
+        @field(resolver: "UserMutator@logout")
+
+    forgotPassword(email: String!): String
+        @validator(class: "ForgotPasswordValidator")
+        @field(resolver: "UserMutator@forgotPassword")
+
+    confirmCode(code: String!, email: String!): String
+        @field(resolver: "UserMutator@confirmCode")
+
+    resetPassword(
+        code: String!
+        email: String!
+        password: String!
+        password_confirmation: String!
+    ): User
+        @validator(class: "ResetPasswordValidator")
+        @field(resolver: "UserMutator@resetPassword")
+
+    editProfil(input: editProfileInput): User!
+        @guard(with: "sanctum")
+        @field(resolver: "UserMutator@editProfil")
+
+    editPassword(current_password: String, password: String): User!
+        @guard(with: "sanctum")
+        @field(resolver: "UserMutator@editPassword")
+
+    updateUserImage(file: Upload!): User!
+        @guard(with: "sanctum")
+        @field(resolver: "UserMutator@updateUserImage")
+
+    loginSocial(
+        name: String!
+        email: String
+        phone: String
+        provider_id: String!
+        provider_type: ProviderType!
+    ): LoginResponse! @field(resolver: "UserMutator@loginSocial")
+}
