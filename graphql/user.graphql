@@ -4,10 +4,9 @@ type User {
     email: String
     phone: String
     email_verified_at: DateTime
-    created_at: DateTime!
-    updated_at: DateTime!
-    images: [Image]! @morphMany
+    image_url: String
 }
+
 enum ProviderType {
     FACEBOOK
     GOOGLE
@@ -17,14 +16,16 @@ type LoginResponse {
     token: String!
     user: User
 }
-input editProfileInput {
-    name: String
-    email: String
-}
+
+#input editProfileInput {
+#  name: String
+#   email: String
+#}
 
 extend type Query {
     me: User @auth(guard: "sanctum")
 }
+
 extend type Mutation {
     register(
         name: String
@@ -76,5 +77,6 @@ extend type Mutation {
         phone: String
         provider_id: String!
         provider_type: ProviderType!
+        url: Upload
     ): LoginResponse! @field(resolver: "UserMutator@loginSocial")
 }

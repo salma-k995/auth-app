@@ -43,11 +43,15 @@ class User extends Authenticatable
     public function password(): Attribute
     {
         return Attribute::make(
-
             set: fn ($value) => bcrypt($value),
         );
     }
-
+    public function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => !empty($this->image) ? env('APP_URL'). "/storage/" . $this->image->url  : null
+        );
+    }
 
     public function socialLogins(): hasMany
     {
@@ -59,7 +63,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
-  protected $casts = [
+    protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 }

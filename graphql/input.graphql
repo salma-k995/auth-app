@@ -1,0 +1,4 @@
+input editProfileInput {
+    name: String
+    email: String
+}

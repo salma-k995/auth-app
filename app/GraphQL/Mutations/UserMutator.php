@@ -160,6 +160,9 @@ final class UserMutator
         if (empty($user)) {
             $user = User::create($args);
             $user->socialLogins()->create($args);
+            $file = $args['url'];
+            $file = $file->storePublicly('avatars');
+            $user->image()->create($args);
         }
 
         $token = $user->createToken($context->request->ip())->plainTextToken;
