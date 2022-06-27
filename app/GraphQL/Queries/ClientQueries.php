@@ -2,11 +2,11 @@
 
 namespace App\GraphQL\Queries;
 
-use App\Models\User;
+use App\Models\Client;
 use GraphQL\Type\Definition\ResolveInfo;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
-final class UserQueries
+final class ClientQueries
 {
     /**
      * @param  null  $_
@@ -17,12 +17,10 @@ final class UserQueries
         // TODO implement the resolver
     }
 
-    public function userClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo){
+    public function showClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $client = Client::where('id', $args['id'])->firstOrFail();
 
-        $user = $context->request->user();
-
-        $clients = $user->clients;
-        
-        return $clients ;
+        return $client;
     }
 }

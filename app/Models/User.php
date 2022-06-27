@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -27,6 +26,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
@@ -35,21 +43,24 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
     public function image()
     {
-        return $this->morphOne(Image::class, 'imageable');
+        return $this->morphOne(Image::class, 'imageable')->orderBy('created_at', 'desc');
     }
 
     public function password(): Attribute
     {
         return Attribute::make(
-            set: fn ($value) => bcrypt($value),
+             set: fn ($value) => bcrypt($value),
         );
     }
+
     public function imageUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => !empty($this->image) ? env('APP_URL'). "/storage/" . $this->image->url  : null
+            //    get: fn () => !empty($this->image) ? $this->image->url  : null
+            get: fn () => !empty($this->image) ? env('APP_URL') . "/storage/" . $this->image->url  : null
         );
     }
 
@@ -58,12 +69,13 @@ class User extends Authenticatable
         return $this->hasMany(Sociallogin::class);
     }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function clients(): hasMany
+    {
+        return $this->hasMany(Client::class);
+    }
+
+    public function products(): hasMany
+    {
+        return $this->hasMany(Product::class);
+    }
 }

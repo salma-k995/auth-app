@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Hash;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 
 final class UserMutator
 {
     public function register($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = User::create($args);
-        $token = $user->createToken('auth_token')->plainTextToken;
-        return  ['token' => $token, 'user' => $user];
+
+        return $user;
     }
 
     function login($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
@@ -34,6 +34,8 @@ final class UserMutator
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return ['token' => $token, 'user' => $user];
+
+      
     }
 
     function logout($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
@@ -101,15 +103,17 @@ final class UserMutator
         return $user;
     }
 
-    public function editProfil($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function updateUser($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
+
         $user->update($args['input']);
         $user->save();
+
         return $user;
     }
 
-    public function editPassword($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function updateUserPassword($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
 
@@ -128,17 +132,15 @@ final class UserMutator
         return $user;
     }
 
-
     public function updateUserImage($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
 
-        $file = $args['file'];
+        $file = $args['url'];
 
-        $path = $file->storePublicly('avatars');
-
+        $fileName = $file->storePublicly('avatars', 'public');
         $user->image()->create([
-            'url' => $path
+            'url' => $fileName
         ]);
 
         return $user;
@@ -146,13 +148,13 @@ final class UserMutator
 
     public function loginSocial($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $user = User::when(array_key_exists('email', $args), function ($query) use($args) {
+        $user = User::when(array_key_exists('email', $args), function ($query) use ($args) {
             $query->where('email', $args['email']);
         })
-            ->when(array_key_exists('phone', $args), function ($query) use($args) {
+            ->when(array_key_exists('phone', $args), function ($query) use ($args) {
                 $query->orWhere('phone', $args['phone']);
             })
-            ->whereHas('socialLogins', function ($query) use($args) {
+            ->whereHas('socialLogins', function ($query) use ($args) {
                 $query->where('provider_id', $args['provider_id']);
             })
             ->first();
@@ -160,9 +162,12 @@ final class UserMutator
         if (empty($user)) {
             $user = User::create($args);
             $user->socialLogins()->create($args);
+
             $file = $args['url'];
-            $file = $file->storePublicly('avatars');
-            $user->image()->create($args);
+            $pathName = $file->storePublicly('avatars', 'public');
+            $user->image()->create([
+                'url' => $pathName
+            ]);
         }
 
         $token = $user->createToken($context->request->ip())->plainTextToken;

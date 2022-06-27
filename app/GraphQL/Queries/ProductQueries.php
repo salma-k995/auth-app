@@ -2,11 +2,11 @@
 
 namespace App\GraphQL\Queries;
 
-use App\Models\User;
+use App\Models\Product;
 use GraphQL\Type\Definition\ResolveInfo;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
-final class UserQueries
+final class ProductQueries
 {
     /**
      * @param  null  $_
@@ -17,12 +17,11 @@ final class UserQueries
         // TODO implement the resolver
     }
 
-    public function userClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo){
 
-        $user = $context->request->user();
+    public function showProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $product = Product::where('id', $args['id'])->firstOrFail();
 
-        $clients = $user->clients;
-        
-        return $clients ;
+        return $product;
     }
 }

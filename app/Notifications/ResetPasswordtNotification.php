@@ -41,7 +41,7 @@ class ResetPasswordtNotification extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
+                    ->line('You can change your password by using this confirmation code.')
                     ->line($this->token)
                     ->line('Thank you for using our application!')
                     ->action('Notification Action', url('/'));

@@ -1,8 +1,7 @@
 type Image {
     id: ID!
     url: String
-    imageable_id :ID
+    imageable_id: ID
     imageable_type: String
-    imageable: Imageable! @morphTo
-
+    # imageable: Imageable! @morphTo
 }

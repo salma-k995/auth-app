@@ -7,23 +7,17 @@ type User {
     image_url: String
 }
 
-enum ProviderType {
-    FACEBOOK
-    GOOGLE
-}
-
 type LoginResponse {
     token: String!
     user: User
 }
 
-#input editProfileInput {
-#  name: String
-#   email: String
-#}
-
 extend type Query {
     me: User @auth(guard: "sanctum")
+
+    userClients: [Client]
+        @guard(with: "sanctum")
+        @field(resolver: "UserQueries@userClients")
 }
 
 extend type Mutation {
@@ -32,11 +26,11 @@ extend type Mutation {
         password: String
         email: String
         password_confirmation: String
-    ): LoginResponse!
+    ): User!
         @validator(class: "RegisterValidator")
         @field(resolver: "UserMutator@register")
 
-    login(email: String!, password: String!): LoginResponse
+    login(email: String!, password: String!): LoginResponse!
         @field(resolver: "UserMutator@login")
 
     logout: String
@@ -59,16 +53,17 @@ extend type Mutation {
         @validator(class: "ResetPasswordValidator")
         @field(resolver: "UserMutator@resetPassword")
 
-    editProfil(input: editProfileInput): User!
+    updateUser(input: editProfileInput): User!
         @guard(with: "sanctum")
-        @field(resolver: "UserMutator@editProfil")
+        @field(resolver: "UserMutator@updateUser")
 
-    editPassword(current_password: String, password: String): User!
+    updateUserPassword(current_password: String, password: String): User!
         @guard(with: "sanctum")
-        @field(resolver: "UserMutator@editPassword")
+        @field(resolver: "UserMutator@updateUserPassword")
 
-    updateUserImage(file: Upload!): User!
+    updateUserImage(url: Upload!): User!
         @guard(with: "sanctum")
+        @validator(class: "UpdateUserImageValidator")
         @field(resolver: "UserMutator@updateUserImage")
 
     loginSocial(

@@ -2,3 +2,10 @@ input editProfileInput {
     name: String
     email: String
 }
+enum ProviderType {
+    FACEBOOK
+    GOOGLE
+}
+
+
+

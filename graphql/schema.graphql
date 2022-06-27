@@ -5,9 +5,12 @@ scalar Upload
     @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Upload")
 
 #import user.graphql
+#import product.graphql
 #import image.graphql
 #import input.graphql
-
+#import response.graphql
+#import client.graphql
+#import order.graphql
 type Query
 
 type Mutation

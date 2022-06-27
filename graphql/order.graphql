@@ -1,0 +1,38 @@
+type Order {
+    id: ID!
+    reference: String!
+    client: Client! @belongsTo
+    products: [Product!]! @belongsToMany
+}
+
+enum StatusType {
+    PENDING
+    INPROGRESS
+    COMPLETED
+}
+
+extend type Query {
+    orders(id: ID!): [Order] @field(resolver: "OrderQueries@orders")
+
+    orderProducts(id: ID!): [Product]
+        @field(resolver: "OrderQueries@orderProducts")
+}
+extend type Mutation {
+    createOrder(
+        reference: String
+        objects: [ID]!
+        #  total_price: Int
+        quantity: Int
+    ): Order
+        @guard(with: "clients")
+        @field(resolver: "OrderMutator@createOrder")
+
+    updateStatus(id: ID!, status: StatusType!): String
+        @field(resolver: "OrderMutator@updateStatus")
+
+    deleteOrder(id: ID!, objects: [ID]!): String
+        @field(resolver: "OrderMutator@deleteOrder")
+
+    deleteOrders(object: [ID]!): String
+        @field(resolver: "OrderMutator@deleteOrders")
+}
