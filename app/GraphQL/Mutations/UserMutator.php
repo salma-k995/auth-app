@@ -35,7 +35,6 @@ final class UserMutator
 
         return ['token' => $token, 'user' => $user];
 
-      
     }
 
     function logout($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)

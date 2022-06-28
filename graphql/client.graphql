@@ -9,8 +9,11 @@ type Client {
 }
 
 extend type Query {
+
     meClient: Client @auth(guard: "clients")
+
     clients: [Client]! @paginate(model: "Client")
+
     showClient(id: ID!): Client @field(resolver: "ClientQueries@showClient")
 }
 
@@ -20,6 +23,7 @@ type LoginClientResponse {
 }
 
 extend type Mutation {
+
     registerClient(
         first_name: String!
         last_name: String!
@@ -45,4 +49,6 @@ extend type Mutation {
 
     deleteClients(object: [ID]!): String
         @field(resolver: "ClientMutator@deleteClients")
+
+    exportClient: String @field(resolver: "ClientMutator@exportClient")
 }

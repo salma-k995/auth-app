@@ -6,18 +6,22 @@ type Product {
     user: User! @belongsTo
     orders: [Order!]! @belongsToMany
     image_url: String
-
 }
 
 extend type Query {
+    
     products: [Product]! @paginate(model: "Product") @guard(with: "sanctum")
 
     showProduct(id: ID!): Product @field(resolver: "ProductQueries@showProduct")
 }
 
 extend type Mutation {
-
-    createProduct(name: String, description: String, price: String! , url: Upload!): Product
+    createProduct(
+        name: String
+        description: String
+        price: String!
+        url: Upload!
+    ): Product
         @guard(with: "sanctum")
         @field(resolver: "ProductMutator@createProduct")
 
@@ -25,8 +29,7 @@ extend type Mutation {
         id: ID!
         name: String
         description: String
-        price: String,
-
+        price: String
     ): String
         @guard(with: "sanctum")
         @field(resolver: "ProductMutator@updateProduct")
@@ -35,10 +38,8 @@ extend type Mutation {
         @guard(with: "sanctum")
         @field(resolver: "ProductMutator@deleteProduct")
 
+    deleteProducts(object: [ID]!): String
+        @field(resolver: "ProductMutator@deleteProducts")
 
-    deleteProducts(object:[ID]!):String
-    @field(resolver: "ProductMutator@deleteProducts")
-
-    exportProduct:String
-    @field(resolver: "ProductMutator@exportProduct")
+    exportAllProduct: String @field(resolver: "ProductMutator@exportAllProduct")
 }

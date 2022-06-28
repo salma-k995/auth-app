@@ -12,20 +12,26 @@ enum StatusType {
 }
 
 extend type Query {
+
     orders(id: ID!): [Order] @field(resolver: "OrderQueries@orders")
 
     orderProducts(id: ID!): [Product]
         @field(resolver: "OrderQueries@orderProducts")
 }
 extend type Mutation {
-    createOrder(
+    
+    createOrder(reference: String, objects: [ID]!, quantity: Int): Order
+        @guard(with: "clients")
+        @field(resolver: "OrderMutator@createOrder")
+
+    updateOrder(
+        id: ID!
         reference: String
         objects: [ID]!
-        #  total_price: Int
         quantity: Int
     ): Order
         @guard(with: "clients")
-        @field(resolver: "OrderMutator@createOrder")
+        @field(resolver: "OrderMutator@updateOrder")
 
     updateStatus(id: ID!, status: StatusType!): String
         @field(resolver: "OrderMutator@updateStatus")

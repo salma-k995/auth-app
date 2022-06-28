@@ -17,12 +17,12 @@ final class UserQueries
         // TODO implement the resolver
     }
 
-    public function userClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo){
-
+    public function userClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
         $user = $context->request->user();
 
         $clients = $user->clients;
-        
-        return $clients ;
+
+        return $clients;
     }
 }

@@ -5,6 +5,7 @@ namespace App\GraphQL\Mutations;
 use App\Exports\ProductsExport;
 use App\Models\Product;
 use GraphQL\Type\Definition\ResolveInfo;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
@@ -37,7 +38,7 @@ final class ProductMutator
     public function updateProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $product = Product::where('id', $args['id'])->firstOrFail();
-    
+
         $product =  $product->update($args);
 
         return 'the product us updated successfuly';
@@ -59,9 +60,18 @@ final class ProductMutator
         return 'All product are deleted successfuly';
     }
 
-    public function exportProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function exportAllProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        Excel::store(new ProductsExport(2018), 'products.xlsx');
-        return "goood";
+
+        if (Storage::disk('public')->exists('products.xlsx')) {
+
+            Storage::disk('public')->delete('products.xlsx');
+
+            Excel::store(new ProductsExport, 'products.xlsx');
+        }
+
+        Excel::store(new ProductsExport, 'products.xlsx');
+
+        return env('APP_URL') . "/storage/" . 'products.xlsx';
     }
 }

@@ -17,11 +17,11 @@ final class ProductQueries
         // TODO implement the resolver
     }
 
-
     public function showProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $product = Product::where('id', $args['id'])->firstOrFail();
 
         return $product;
     }
+
 }
