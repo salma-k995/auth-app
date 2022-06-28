@@ -60,17 +60,18 @@ final class ProductMutator
         return 'All product are deleted successfuly';
     }
 
-    public function exportAllProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function exportProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-
         if (Storage::disk('public')->exists('products.xlsx')) {
 
             Storage::disk('public')->delete('products.xlsx');
-
-            Excel::store(new ProductsExport, 'products.xlsx');
         }
 
-        Excel::store(new ProductsExport, 'products.xlsx');
+        if (array_key_exists('ids', $args)) {
+            Excel::store(new ProductsExport($args['ids']), 'products.xlsx', 'public');
+        }
+        else Excel::store(new ProductsExport(), 'products.xlsx', 'public');
+
 
         return env('APP_URL') . "/storage/" . 'products.xlsx';
     }

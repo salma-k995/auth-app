@@ -3,6 +3,7 @@
 namespace App\GraphQL\Mutations;
 
 use App\Exceptions\GraphQLException;
+use App\Exports\UsersExport;
 use App\Models\Image;
 use App\Models\SocialLogin;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 final class UserMutator
 {
@@ -172,5 +174,21 @@ final class UserMutator
         $token = $user->createToken($context->request->ip())->plainTextToken;
 
         return ['token' => $token, 'user' => $user];
+    }
+
+
+    public function exportUsers($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        if (Storage::disk('public')->exists('users.xlsx')) {
+
+            Storage::disk('public')->delete('users.xlsx');
+        }
+
+        if (array_key_exists('ids', $args)) {
+            Excel::store(new UsersExport($args['ids']), 'users.xlsx', 'public');
+        }
+        else Excel::store(new UsersExport(), 'users.xlsx', 'public');
+
+        return env('APP_URL') . "/storage/" . 'users.xlsx';
     }
 }

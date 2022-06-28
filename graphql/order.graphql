@@ -12,16 +12,22 @@ enum StatusType {
 }
 
 extend type Query {
+    orders: [Order]! @guard(with: "sanctum") @paginate(model: "Order")
 
-    orders(id: ID!): [Order] @field(resolver: "OrderQueries@orders")
+    clientOrders(id: ID!): [Order]
+        @paginate(builder: "App\\GraphQL\\Queries\\OrderQueries@clientOrders")
 
     orderProducts(id: ID!): [Product]
         @field(resolver: "OrderQueries@orderProducts")
 }
 extend type Mutation {
-    
-    createOrder(reference: String, objects: [ID]!, quantity: Int): Order
-        @guard(with: "clients")
+    createOrder(
+        reference: String
+        objects: [ID]!
+        quantity: Int
+        client_id: ID!
+    ): Order
+        @guard(with: "sanctum")
         @field(resolver: "OrderMutator@createOrder")
 
     updateOrder(
@@ -29,8 +35,9 @@ extend type Mutation {
         reference: String
         objects: [ID]!
         quantity: Int
+        client_id: ID
     ): Order
-        @guard(with: "clients")
+        @guard(with: "sanctum")
         @field(resolver: "OrderMutator@updateOrder")
 
     updateStatus(id: ID!, status: StatusType!): String
@@ -41,4 +48,7 @@ extend type Mutation {
 
     deleteOrders(object: [ID]!): String
         @field(resolver: "OrderMutator@deleteOrders")
+
+    exportOrders(ids: [ID]): String
+        @field(resolver: "OrderMutator@exportOrders")
 }

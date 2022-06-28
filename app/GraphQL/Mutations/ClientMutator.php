@@ -68,14 +68,18 @@ final class ClientMutator
         return 'Clients are deleted successfuly';
     }
 
-    public function exportClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function exportClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        if (Storage::disk('public')->exists('products.xlsx')) {
+        if (Storage::disk('public')->exists('clients.xlsx')) {
 
-            Storage::disk('public')->delete('products.xlsx');
+            Storage::disk('public')->delete('clients.xlsx');
         }
 
-        Excel::store(new ClientsExport(2018), 'clients.xlsx');
+        if (array_key_exists('ids', $args)) {
+            Excel::store(new ClientsExport($args['ids']), 'clients.xlsx', 'public');
+        }
+
+       else Excel::store(new ClientsExport(), 'clients.xlsx', 'public');
 
         return env('APP_URL') . "/storage/" . 'clients.xlsx';
     }

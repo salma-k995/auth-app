@@ -13,12 +13,18 @@ class Order extends Model
     use HasFactory ,CascadeSoftDeletes;
 
     protected $cascadeDeletes = ['clients'];
-    
+
 
     protected $fillable = [
         'reference',
         'client_id',
+        'user_id'
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function client(): BelongsTo
     {

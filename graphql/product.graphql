@@ -9,7 +9,7 @@ type Product {
 }
 
 extend type Query {
-    
+
     products: [Product]! @paginate(model: "Product") @guard(with: "sanctum")
 
     showProduct(id: ID!): Product @field(resolver: "ProductQueries@showProduct")
@@ -41,5 +41,5 @@ extend type Mutation {
     deleteProducts(object: [ID]!): String
         @field(resolver: "ProductMutator@deleteProducts")
 
-    exportAllProduct: String @field(resolver: "ProductMutator@exportAllProduct")
+    exportProducts(ids:[ID]): String @field(resolver: "ProductMutator@exportProducts")
 }

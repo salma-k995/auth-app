@@ -2,10 +2,10 @@
 
 namespace App\Exports;
 
-use App\Models\Order;
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 
-class OrdersExport implements FromCollection
+class UsersExport implements FromCollection
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -19,12 +19,11 @@ class OrdersExport implements FromCollection
     }
     public function collection()
     {
-        // return Order::all();
-
+        // return User::all();
         if ($this->ids)
-            $orders = Order::whereIn('id', $this->ids)->get();
+            $orders = User::whereIn('id', $this->ids)->get();
 
-        else $orders = Order::all();
+        else $orders = User::all();
 
         return $orders;
     }

@@ -15,9 +15,17 @@ type LoginResponse {
 extend type Query {
     me: User @auth(guard: "sanctum")
 
-    userClients: [Client]
+    userAllClients: [Client]
         @guard(with: "sanctum")
-        @field(resolver: "UserQueries@userClients")
+        @paginate(builder: "App\\GraphQL\\Queries\\UserQueries@userAllClients")
+
+    userAllProducts: [Product]
+        @guard(with: "sanctum")
+        @paginate(builder: "App\\GraphQL\\Queries\\UserQueries@userAllProducts")
+
+    userAllOrders: [Order]
+        @guard(with: "sanctum")
+        @paginate(builder: "App\\GraphQL\\Queries\\UserQueries@userAllOrders")
 }
 
 extend type Mutation {
@@ -74,4 +82,6 @@ extend type Mutation {
         provider_type: ProviderType!
         url: Upload
     ): LoginResponse! @field(resolver: "UserMutator@loginSocial")
+
+    exportUsers(ids: [ID]): String @field(resolver: "UserMutator@exportUsers")
 }

@@ -25,9 +25,10 @@ final class OrderMutator
 
     public function createOrder($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $client = $context->request->user();
+        $user = $context->request->user();
 
-        $order =  $client->orders()->create($args);
+        $order =  $user->orders()->create($args);
+        error_log($order);
 
         foreach ($args['objects'] as $object) {
 
@@ -49,6 +50,7 @@ final class OrderMutator
         $order = Order::where('id', $args['id'])->firstOrFail();
 
         $order_products = $order->products()->detach();
+
         foreach ($args['objects'] as $object) {
 
             $product = Product::find($object);
@@ -60,6 +62,9 @@ final class OrderMutator
                 ]
             );
         }
+
+        $order->update($args);
+        $order->save();
 
         return $order;
     }
@@ -92,14 +97,18 @@ final class OrderMutator
         return 'Order status is updated successfuly';
     }
 
-    public function exportAllProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function exportOrders($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         if (Storage::disk('public')->exists('orders.xlsx')) {
 
             Storage::disk('public')->delete('orders.xlsx');
         }
+        
+        if (array_key_exists('ids', $args)) {
+            Excel::store(new OrdersExport($args['ids']), 'orders.xlsx', 'public');
+        }
 
-        Excel::store(new OrdersExport, 'orders.xlsx');
+       else Excel::store(new OrdersExport(), 'orders.xlsx', 'public');
 
         return env('APP_URL') . "/storage/" . 'orders.xlsx';
     }

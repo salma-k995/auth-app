@@ -18,16 +18,14 @@ final class OrderQueries
         // TODO implement the resolver
     }
 
-    public function orders($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function clientOrders($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $client = Client::where('id', $args['id'])->firstOrFail();
 
-        $client_orders= $client->orders;
+        $client_orders= $client->orders();
 
         return $client_orders;
     }
-
-
 
     public function orderProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
