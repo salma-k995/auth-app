@@ -45,25 +45,20 @@ final class ClientMutator
 
     public function updateClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $client = Client::where('id', $args['id'])->firstOrFail();
+        $user = $context->request->user();
+
+        $client = Client::where('id', $args['id'])->where('user_id',$user->id )->firstOrFail();
 
         $client = $client->update($args);
 
         return 'Client is updated successfuly';
     }
 
-    public function deleteClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
-    {
-        $client = Client::where('id', $args['id'])->firstOrFail();
-
-        $client->delete();
-
-        return 'The client is deleted successfuly';
-    }
-
     public function deleteClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        Client::whereIn('id', $args['object'])->delete();
+        $user = $context->request->user();
+
+        Client::whereIn('id', $args['object'])->where('user_id',$user->id)->delete();
 
         return 'Clients are deleted successfuly';
     }

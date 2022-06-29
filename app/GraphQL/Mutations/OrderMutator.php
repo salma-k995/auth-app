@@ -28,7 +28,6 @@ final class OrderMutator
         $user = $context->request->user();
 
         $order =  $user->orders()->create($args);
-        error_log($order);
 
         foreach ($args['objects'] as $object) {
 
@@ -69,18 +68,12 @@ final class OrderMutator
         return $order;
     }
 
-    public function deleteOrder($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
-    {
-        $order =  Order::where('id', $args['id'])->firstOrFail();
-
-        $order_products = $order->products()->detach($args['objects']);
-
-        return 'Order is deleted';
-    }
 
     public function deleteOrders($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        Order::whereIn('id', $args['object'])->delete();
+        $user= $context->request->user();
+
+        Order::whereIn('id', $args['object'])->where('user_id' , $user->id)->delete();
 
         return 'Orders are deleted successfuly';
     }
@@ -103,7 +96,7 @@ final class OrderMutator
 
             Storage::disk('public')->delete('orders.xlsx');
         }
-        
+
         if (array_key_exists('ids', $args)) {
             Excel::store(new OrdersExport($args['ids']), 'orders.xlsx', 'public');
         }

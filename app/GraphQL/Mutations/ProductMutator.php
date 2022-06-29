@@ -37,25 +37,27 @@ final class ProductMutator
 
     public function updateProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $product = Product::where('id', $args['id'])->firstOrFail();
+        $user = $context->request->user();
+
+        $product = Product::where('id', $args['id'])->where('user_id', $user->id)->firstOrFail();
+
+        $file = $args['url'];
+        $fileName = $file->storePublicly('products', 'public');
+        $product->image()->update([
+            'url' => $fileName
+        ]);
 
         $product =  $product->update($args);
 
         return 'the product us updated successfuly';
     }
 
-    public function deleteProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
-    {
-        $product = Product::where('id', $args['id'])->firstOrFail();
-
-        $product->delete();
-
-        return 'the product is deleted successufuly';
-    }
-
     public function deleteProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        Product::whereIn('id', $args['object'])->delete();
+        $user = $context->request->user();
+        error_log($user);
+
+        Product::whereIn('id', $args['object'])->where('user_id', $user->id)->delete();
 
         return 'All product are deleted successfuly';
     }
@@ -69,8 +71,7 @@ final class ProductMutator
 
         if (array_key_exists('ids', $args)) {
             Excel::store(new ProductsExport($args['ids']), 'products.xlsx', 'public');
-        }
-        else Excel::store(new ProductsExport(), 'products.xlsx', 'public');
+        } else Excel::store(new ProductsExport(), 'products.xlsx', 'public');
 
 
         return env('APP_URL') . "/storage/" . 'products.xlsx';
