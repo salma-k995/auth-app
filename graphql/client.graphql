@@ -9,33 +9,25 @@ type Client {
 }
 
 extend type Query {
-    meClient: Client @auth(guard: "clients")
+    clients(orderBy: _ @orderBy(columns: ["created_at"])): [Client]!
+        @guard(with: "sanctum")
+        @paginate(model: "Client")
 
-    clients: [Client]! @guard(with: "sanctum") @paginate(model: "Client")
-
-    showClient(id: ID!): Client @field(resolver: "ClientQueries@showClient")
-}
-
-type LoginClientResponse {
-    token: String!
-    client: Client
+    showClient(id: ID!): Client
+        @guard(with: "sanctum")
+        @field(resolver: "ClientQueries@showClient")
 }
 
 extend type Mutation {
-    registerClient(
+    createClient(
         first_name: String!
         last_name: String!
         email: String!
         phone: String!
-        password: String!
-        password_confirmation: String
     ): Client
         @guard(with: "sanctum")
         @validator(class: "RegisterClientValidator")
-        @field(resolver: "ClientMutator@registerClient")
-
-    loginClient(email: String!, password: String!): LoginClientResponse
-        @field(resolver: "ClientMutator@loginClient")
+        @field(resolver: "ClientMutator@createClient")
 
     updateClient(
         id: ID!
@@ -48,12 +40,15 @@ extend type Mutation {
         @validator(class: "UpdateClientValidator")
         @field(resolver: "ClientMutator@updateClient")
 
-    #  deleteClient(id: ID!): String @field(resolver: "ClientMutator@deleteClient")
-
-    deleteClients(object:[ID]!): String
+    deleteClients(object: [ID]!): String
         @guard(with: "sanctum")
         @field(resolver: "ClientMutator@deleteClients")
 
     exportClients(ids: [ID]): String
         @field(resolver: "ClientMutator@exportClients")
+
+    searchClients(terme: String): [Client]
+        @paginate(
+            builder: "App\\GraphQL\\Mutations\\ClientMutator@searchClients"
+        )
 }

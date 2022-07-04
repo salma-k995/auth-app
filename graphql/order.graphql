@@ -1,8 +1,15 @@
+#scalar EnumValue
+
 type Order {
     id: ID!
     reference: String!
     client: Client! @belongsTo
     products: [Product!]! @belongsToMany
+    OrderHistories: [OrderHistory!]! @hasMany
+}
+input OrderProduct {
+    id: ID
+    quantity: Int
 }
 
 enum StatusType {
@@ -12,7 +19,13 @@ enum StatusType {
 }
 
 extend type Query {
-    orders: [Order]! @guard(with: "sanctum") @paginate(model: "Order")
+    orders(orderBy: _ @orderBy(columns: ["created_at"])): [Order]!
+        @guard(with: "sanctum")
+        @paginate(model: "Order")
+
+    showOrder(id: ID!): Order
+        @guard(with: "sanctum")
+        @field(resolver: "OrderQueries@showOrder")
 
     clientOrders(id: ID!): [Order]
         @paginate(builder: "App\\GraphQL\\Queries\\OrderQueries@clientOrders")
@@ -31,13 +44,7 @@ extend type Mutation {
         @validator(class: "CreateOrderValidator")
         @field(resolver: "OrderMutator@createOrder")
 
-    updateOrder(
-        id: ID!
-        reference: String
-        objects: [ID]!
-        quantity: Int
-        client_id: ID
-    ): Order
+    updateOrder(id: ID!, reference: String, products: [OrderProduct]): Order
         @guard(with: "sanctum")
         @field(resolver: "OrderMutator@updateOrder")
 
@@ -50,4 +57,7 @@ extend type Mutation {
 
     exportOrders(ids: [ID]): String
         @field(resolver: "OrderMutator@exportOrders")
+
+    searchOrders(terme: String): [Order]
+        @paginate(builder: "App\\GraphQL\\Mutations\\OrderMutator@searchOrders")
 }

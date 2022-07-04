@@ -46,4 +46,11 @@ final class UserQueries
 
         return $orders;
     }
+
+    public function showUser($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $user = User::findOrFail($args['id']);
+
+        return $user;
+    }
 }

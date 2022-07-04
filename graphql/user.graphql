@@ -13,7 +13,13 @@ type LoginResponse {
 }
 
 extend type Query {
+
     me: User @auth(guard: "sanctum")
+
+    showUser(id:ID!):User @field(resolver: "UserQueries@showUser")
+   # userById(id: ID! @eq): User @find
+   
+    users(orderBy: _ @orderBy(columns: ["created_at"])): [User]! @guard(with: "sanctum") @paginate(model: "User")
 
     userAllClients: [Client]
         @guard(with: "sanctum")
@@ -84,4 +90,12 @@ extend type Mutation {
     ): LoginResponse! @field(resolver: "UserMutator@loginSocial")
 
     exportUsers(ids: [ID]): String @field(resolver: "UserMutator@exportUsers")
+
+    searchUsers(terme:String): [User]
+        @paginate(builder: "App\\GraphQL\\Mutations\\UserMutator@searchUsers")
+
+    deleteUsers(object: [ID]!): String
+       # @guard(with: "sanctum")
+        @field(resolver: "UserMutator@deleteUsers")
+
 }

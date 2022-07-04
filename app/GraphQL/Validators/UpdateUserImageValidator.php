@@ -14,7 +14,7 @@ final class UpdateUserImageValidator extends Validator
     public function rules(): array
     {
         return [
-            'url' => ['required', 'mimes:png,jpeg,gif,jpg', 'max:8MB' ]
+            'url' => ['required', 'mimes:png,jpeg,gif,jpg', 'max:8MB']
         ];
     }
 

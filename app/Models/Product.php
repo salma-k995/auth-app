@@ -13,7 +13,7 @@ use Dyrynda\Database\Support\CascadeSoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, SoftDeletes, CascadeSoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $cascadeDeletes = ['users'];
 
@@ -53,5 +53,4 @@ class Product extends Model
             get: fn () => !empty($this->image) ? env('APP_URL') . "/storage/" . $this->image->url  : null
         );
     }
-
 }

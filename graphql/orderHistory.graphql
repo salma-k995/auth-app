@@ -1,0 +1,15 @@
+
+type OrderHistory {
+
+    status: String
+    order: Order! @belongsTo
+}
+
+
+extend type Query{
+
+  orderHistories(id:ID!): [OrderHistory]
+   @field(resolver: "OrderHistoryQueries@orderHistories")
+
+
+}

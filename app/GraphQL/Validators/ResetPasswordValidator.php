@@ -15,16 +15,16 @@ final class ResetPasswordValidator extends Validator
     {
         return [
             // TODO Add your validation rules
-            'password'=> ['required' ,'min:8','confirmed']
+            'password' => ['required', 'min:8', 'confirmed']
         ];
     }
 
-    public function messages():array {
+    public function messages(): array
+    {
         return [
             'password.required' => 'Le champs mot de passe est obligatoire.',
             'password.min' => 'Le champs mot de passe doit compoter au minimum 8 caractéres.',
             'password.confirmed' => 'Vérifier votre password.',
         ];
-
     }
 }

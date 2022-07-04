@@ -8,6 +8,8 @@ use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
+use App\Exceptions\GraphQLException;
+use Illuminate\Support\Facades\DB;
 
 final class ProductMutator
 {
@@ -55,11 +57,25 @@ final class ProductMutator
     public function deleteProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
-        error_log($user);
 
-        Product::whereIn('id', $args['object'])->where('user_id', $user->id)->delete();
+        try {
+            DB::beginTransaction();
 
-        return 'All product are deleted successfuly';
+            foreach ($args['object'] as $product) {
+
+                $product = $user->products->where('id', $product)->firstOrFail();
+
+                $product->delete();
+            }
+            DB::commit();
+
+            return 'All product are deleted successfuly';
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            throw new GraphQLException("can not delete this product is alerady deleted.", "error");
+        }
     }
 
     public function exportProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
@@ -76,4 +92,13 @@ final class ProductMutator
 
         return env('APP_URL') . "/storage/" . 'products.xlsx';
     }
+
+    public function searchProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $products = Product::where('name', 'LIKE', '%' . $args['terme'] . '%')->orWhere('description',   'LIKE', '%' . $args['terme'] . '%')
+            ->orWhere('price',   'LIKE', '%' . $args['terme'] . '%');
+
+        return $products;
+    }
+    
 }

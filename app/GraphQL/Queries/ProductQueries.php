@@ -19,9 +19,10 @@ final class ProductQueries
 
     public function showProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $product = Product::where('id', $args['id'])->firstOrFail();
+        $user = $context->request->user();
+
+        $product = $user->products->where('id', $args['id'])->firstOrFail();
 
         return $product;
     }
-
 }

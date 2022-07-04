@@ -36,7 +36,6 @@ final class UserMutator
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return ['token' => $token, 'user' => $user];
-
     }
 
     function logout($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
@@ -176,6 +175,28 @@ final class UserMutator
         return ['token' => $token, 'user' => $user];
     }
 
+    public function deleteUsers($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        try {
+            DB::beginTransaction();
+
+            foreach ($args['object'] as $order) {
+
+                $user = User::where('id', $order)->firstOrFail();
+
+                $user->delete();
+            }
+
+            DB::commit();
+
+            return 'All user are deleted successfuly';
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            throw new GraphQLException("can not delete this user is alerady deleted.", "error");
+        }
+    }
 
     public function exportUsers($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
@@ -186,9 +207,15 @@ final class UserMutator
 
         if (array_key_exists('ids', $args)) {
             Excel::store(new UsersExport($args['ids']), 'users.xlsx', 'public');
-        }
-        else Excel::store(new UsersExport(), 'users.xlsx', 'public');
+        } else Excel::store(new UsersExport(), 'users.xlsx', 'public');
 
         return env('APP_URL') . "/storage/" . 'users.xlsx';
+    }
+
+    public function searchUsers($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $users = User::where('name', 'LIKE', '%' . $args['terme'] . '%')->orWhere('email',   'LIKE', '%' . $args['terme'] . '%');
+
+        return $users;
     }
 }

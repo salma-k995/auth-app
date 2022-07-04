@@ -26,7 +26,6 @@ final class EdittPasswordValidator extends Validator
             'new-password.required' => 'Le champs mot de passe courant est obligatoire.',
             'new-password.min' => 'Le champs mot de passe doit compoter au minimum 8 caractéres.',
             'new-password.confirmed' => 'Vérifier votre password.',
-            
         ];
     }
 }

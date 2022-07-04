@@ -15,14 +15,15 @@ final class ForgotPasswordValidator extends Validator
     {
         return [
             // TODO Add your validation rules
-            'email'=> ['required' ,'email'],
+            'email' => ['required', 'email'],
         ];
     }
 
-    public function messages():array {
+    public function messages(): array
+    {
         return [
-        'email.required' => 'Le champs email est obligatoire.',
-        'email.email' => 'Le champs email doit etre un email.',
+            'email.required' => 'Le champs email est obligatoire.',
+            'email.email' => 'Le champs email doit etre un email.',
         ];
     }
 }

@@ -14,15 +14,15 @@ final class ConfirmCodeValidator extends Validator
     public function rules(): array
     {
         return [
-            'token'=> ['required']
+            'token' => ['required']
         ];
     }
 
-    public function messages():array {
+    public function messages(): array
+    {
         return [
             'token.required' => 'Le champs confirme code est obligatoire.',
 
         ];
-
     }
 }

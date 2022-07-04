@@ -9,9 +9,16 @@ type Product {
 }
 
 extend type Query {
-    products: [Product]! @paginate(model: "Product") @guard(with: "sanctum")
 
-    showProduct(id: ID!): Product @field(resolver: "ProductQueries@showProduct")
+    products(orderBy: _ @orderBy(columns: ["created_at"])): [Product]!
+        @paginate(model: "Product")
+        @guard(with: "sanctum")
+
+    showProduct(id: ID!): Product
+        @guard(with: "sanctum")
+        @field(resolver: "ProductQueries@showProduct")
+
+    #  productById(id: ID! @eq): Product @find @guard(with: "sanctum")
 }
 
 extend type Mutation {
@@ -29,7 +36,7 @@ extend type Mutation {
         id: ID!
         name: String
         description: String
-        price: String
+        price: Float
         url: Upload!
     ): String
         @guard(with: "sanctum")
@@ -42,4 +49,9 @@ extend type Mutation {
 
     exportProducts(ids: [ID]): String
         @field(resolver: "ProductMutator@exportProducts")
+
+    searchProducts(terme:String): [Product]
+        @paginate(
+            builder: "App\\GraphQL\\Mutations\\ProductMutator@searchProducts"
+        )
 }

@@ -2,13 +2,13 @@
 
 namespace App\GraphQL\Queries;
 
-use App\Models\Client;
+use App\Models\Order;
 use GraphQL\Type\Definition\ResolveInfo;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 
 use function Safe\error_log;
 
-final class ClientQueries
+final class OrderHistoryQueries
 {
     /**
      * @param  null  $_
@@ -19,12 +19,13 @@ final class ClientQueries
         // TODO implement the resolver
     }
 
-    public function showClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+
+    public function orderHistories($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $user = $context->request->user();
+        $order = Order::findOrFail($args['id']);
+        
+        $histories = $order->orderHistories;
 
-        $client = $user->clients->where('id', $args['id'])->firstOrFail();
-
-        return $client;
+        return $histories;
     }
 }

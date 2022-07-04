@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
+use Illuminate\Support\Facades\DB;
 
 final class ClientMutator
 {
@@ -22,7 +23,7 @@ final class ClientMutator
         // TODO implement the resolver
     }
 
-    public function registerClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    public function createClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
 
@@ -31,23 +32,11 @@ final class ClientMutator
         return $client;
     }
 
-    function loginClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
-    {
-        $client = Client::where('email', $args['email'])->firstOrFail();
-
-        if (!Hash::check($args['password'], $client->password))
-            throw new GraphQLException("invalid credentiels", "Invalid Input");
-
-        $token = $client->createToken('auth_token')->plainTextToken;
-
-        return ['token' => $token, 'client' => $client];
-    }
-
     public function updateClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();
 
-        $client = Client::where('id', $args['id'])->where('user_id',$user->id )->firstOrFail();
+        $client = Client::where('id', $args['id'])->where('user_id', $user->id)->firstOrFail();
 
         $client = $client->update($args);
 
@@ -58,9 +47,26 @@ final class ClientMutator
     {
         $user = $context->request->user();
 
-        Client::whereIn('id', $args['object'])->where('user_id',$user->id)->delete();
+        try {
 
-        return 'Clients are deleted successfuly';
+            DB::beginTransaction();
+
+            foreach ($args['object'] as $client) {
+
+                $client = $user->clients->where('id', $client)->firstOrFail();
+
+                $client->delete();
+            }
+
+            DB::commit();
+
+            return 'All clients are deleted successfuly';
+        } catch (\Exception $e) {
+
+            DB::rollback();
+
+            throw new GraphQLException("can not delete this client is alerady deleted.", "error");
+        }
     }
 
     public function exportClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
@@ -72,10 +78,16 @@ final class ClientMutator
 
         if (array_key_exists('ids', $args)) {
             Excel::store(new ClientsExport($args['ids']), 'clients.xlsx', 'public');
-        }
-
-       else Excel::store(new ClientsExport(), 'clients.xlsx', 'public');
+        } else Excel::store(new ClientsExport(), 'clients.xlsx', 'public');
 
         return env('APP_URL') . "/storage/" . 'clients.xlsx';
+    }
+
+    public function searchClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $clients = Client::where('first_name', 'LIKE', '%' . $args['terme'] . '%')->orWhere('last_name',   'LIKE', '%' . $args['terme'] . '%')
+            ->orWhere('phone', 'LIKE', '%' . $args['terme'] . '%')->orWhere('email', 'LIKE', '%' . $args['terme'] . '%');
+
+        return $clients;
     }
 }

@@ -15,7 +15,7 @@ class SocialLogin extends Model
      *
      * @var array
      */
-    protected $fillable = ['provider_type' , 'provider_id' , 'user_id'];
+    protected $fillable = ['provider_type', 'provider_id', 'user_id'];
 
     public function user(): BelongsTo
     {

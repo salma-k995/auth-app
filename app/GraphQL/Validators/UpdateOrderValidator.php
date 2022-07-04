@@ -23,7 +23,6 @@ final class UpdateOrderValidator extends Validator
         return [
             'reference.required' => 'Le champs reference est obligatoire.',
             'reference.min' => 'Le champs reference doit comporter au minimum 6 caractéres.',
-
             'products' => 'Choisir des produits existants'
         ];
     }

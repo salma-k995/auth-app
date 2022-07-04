@@ -14,18 +14,18 @@ final class UpdateProductValidator extends Validator
     public function rules(): array
     {
         return [
-            'name'=> ['min:3'],
-            'description'=> ['min:10'],
-            'price'=> ['numeric']
+            'name' => ['min:3'],
+            'description' => ['min:10'],
+            'price' => ['numeric']
         ];
     }
 
-    public function messages():array {
+    public function messages(): array
+    {
         return [
-        'name.min' => 'Le champs nom doit compoter au minimum 3 caractéres.',
-        'description.min' => 'Le champs nom doit compoter au minimum 10 caractéres.',
-        'price.numeric' => 'Vérifier le prix.',
+            'name.min' => 'Le champs nom doit compoter au minimum 3 caractéres.',
+            'description.min' => 'Le champs nom doit compoter au minimum 10 caractéres.',
+            'price.numeric' => 'Vérifier le prix.',
         ];
-
     }
 }

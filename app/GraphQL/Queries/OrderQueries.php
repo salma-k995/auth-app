@@ -22,7 +22,7 @@ final class OrderQueries
     {
         $client = Client::where('id', $args['id'])->firstOrFail();
 
-        $client_orders= $client->orders();
+        $client_orders = $client->orders();
 
         return $client_orders;
     }
@@ -31,8 +31,17 @@ final class OrderQueries
     {
         $order = Order::where('id', $args['id'])->firstOrFail();
 
-        $order_products= $order->products;
+        $order_products = $order->products;
 
         return $order_products;
+    }
+
+    public function showOrder($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $user = $context->request->user();
+
+        $order = $user->orders->where('id', $args['id'])->firstOrFail();
+
+        return $order;
     }
 }
