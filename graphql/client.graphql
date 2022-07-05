@@ -19,6 +19,7 @@ extend type Query {
 }
 
 extend type Mutation {
+    
     createClient(
         first_name: String!
         last_name: String!

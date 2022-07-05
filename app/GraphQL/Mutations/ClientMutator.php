@@ -36,8 +36,7 @@ final class ClientMutator
     {
         $user = $context->request->user();
 
-        $client = Client::where('id', $args['id'])->where('user_id', $user->id)->firstOrFail();
-
+        $client = $user->clients()->where('id', $args['id'])->where('user_id', $user->id)->firstOrFail();
         $client = $client->update($args);
 
         return 'Client is updated successfuly';

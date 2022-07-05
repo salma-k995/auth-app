@@ -36,8 +36,7 @@ extend type Query {
 extend type Mutation {
     createOrder(
         reference: String
-        objects: [ID]!
-        quantity: Int
+        products:[OrderProduct]!
         client_id: ID!
     ): Order
         @guard(with: "sanctum")
@@ -49,6 +48,7 @@ extend type Mutation {
         @field(resolver: "OrderMutator@updateOrder")
 
     updateStatus(id: ID!, status: StatusType!): String
+        @guard(with: "sanctum")
         @field(resolver: "OrderMutator@updateStatus")
 
     deleteOrders(object: [ID]!): String

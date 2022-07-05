@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 use function Safe\error_log;
 
@@ -33,17 +32,12 @@ final class OrderMutator
 
         $order =  $user->orders()->create($args);
 
-        foreach ($args['objects'] as $object) {
+        foreach ($args['products'] as $product) {
 
-            $product = Product::find($object);
-
-            $order->products()->attach(
-                $object,
-                [
-                    'quantity' => $args['quantity'],
-                    'total_price' => $args['quantity'] * $product->price
-                ]
-            );
+            $order->products()->attach($product['id'], [
+                'quantity' => $product['quantity'],
+                'total_price' => $product['quantity'] * Product::find($product['id'])->price
+            ]);
         }
 
         return $order;
@@ -51,7 +45,9 @@ final class OrderMutator
 
     public function updateOrder($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $order = Order::where('id', $args['id'])->firstOrFail();
+        $user = $context->request->user();
+
+        $order = $user->orders()->where('id', $args['id'])->firstOrFail();
 
         $orderProductsIds = $order->products()->pluck('products.id')->toArray();
 
@@ -112,7 +108,9 @@ final class OrderMutator
 
     public function updateStatus($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-        $order = Order::where('id', $args['id'])->firstOrFail();
+        $user = $context->request->user();
+
+        $order = $user->orders()->where('id', $args['id'])->firstOrFail();
 
         OrderHistory::create([
             'status' => $order->status,

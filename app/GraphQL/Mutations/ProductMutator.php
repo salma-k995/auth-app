@@ -41,7 +41,7 @@ final class ProductMutator
     {
         $user = $context->request->user();
 
-        $product = Product::where('id', $args['id'])->where('user_id', $user->id)->firstOrFail();
+        $product = $user->products->where('id', $args['id'])->firstOrFail();
 
         $file = $args['url'];
         $fileName = $file->storePublicly('products', 'public');
@@ -100,5 +100,4 @@ final class ProductMutator
 
         return $products;
     }
-    
 }
