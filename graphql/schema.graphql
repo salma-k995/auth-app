@@ -12,6 +12,8 @@ scalar Upload
 #import client.graphql
 #import order.graphql
 #import orderHistory.graphql
+#import reduction.graphql
+
 type Query
 
 type Mutation

@@ -11,6 +11,7 @@ use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 use App\Exceptions\GraphQLException;
 use Illuminate\Support\Facades\DB;
 
+
 final class ProductMutator
 {
     /**
@@ -43,11 +44,13 @@ final class ProductMutator
 
         $product = $user->products->where('id', $args['id'])->firstOrFail();
 
-        $file = $args['url'];
-        $fileName = $file->storePublicly('products', 'public');
-        $product->image()->update([
-            'url' => $fileName
-        ]);
+        if (array_key_exists('url', $args)) {
+            $file = $args['url'];
+            $fileName = $file->storePublicly('products', 'public');
+            $product->image()->update([
+                'url' => $fileName
+            ]);
+        }
 
         $product =  $product->update($args);
 
@@ -61,10 +64,12 @@ final class ProductMutator
         try {
             DB::beginTransaction();
 
-            foreach ($args['object'] as $product) {
+            foreach ($args['productsIds'] as $product) {
 
                 $product = $user->products->where('id', $product)->firstOrFail();
-
+                //  error_log($product);
+                $product->orders()->delete();
+                $product->reductions()->delete();
                 $product->delete();
             }
             DB::commit();
@@ -73,7 +78,6 @@ final class ProductMutator
         } catch (\Exception $e) {
 
             DB::rollback();
-
             throw new GraphQLException("can not delete this product is alerady deleted.", "error");
         }
     }
@@ -89,14 +93,13 @@ final class ProductMutator
             Excel::store(new ProductsExport($args['ids']), 'products.xlsx', 'public');
         } else Excel::store(new ProductsExport(), 'products.xlsx', 'public');
 
-
         return env('APP_URL') . "/storage/" . 'products.xlsx';
     }
 
     public function searchProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $products = Product::where('name', 'LIKE', '%' . $args['terme'] . '%')->orWhere('description',   'LIKE', '%' . $args['terme'] . '%')
-            ->orWhere('price',   'LIKE', '%' . $args['terme'] . '%');
+            ->orWhere('price', 'LIKE', '%' . $args['terme'] . '%');
 
         return $products;
     }

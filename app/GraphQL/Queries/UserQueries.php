@@ -30,7 +30,6 @@ final class UserQueries
 
     public function userAllProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-
         $user = $context->request->user();
 
         $products = $user->products();

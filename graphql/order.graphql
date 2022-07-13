@@ -5,7 +5,7 @@ type Order {
     reference: String!
     client: Client! @belongsTo
     products: [Product!]! @belongsToMany
-    OrderHistories: [OrderHistory!]! @hasMany
+    orderHistories: [OrderHistory!]! @hasMany
 }
 input OrderProduct {
     id: ID
@@ -36,8 +36,8 @@ extend type Query {
 extend type Mutation {
     createOrder(
         reference: String
-        products:[OrderProduct]!
-        client_id: ID!
+        products: [OrderProduct]!
+        client_id: ID
     ): Order
         @guard(with: "sanctum")
         @validator(class: "CreateOrderValidator")
@@ -51,7 +51,7 @@ extend type Mutation {
         @guard(with: "sanctum")
         @field(resolver: "OrderMutator@updateStatus")
 
-    deleteOrders(object: [ID]!): String
+    deleteOrders(ordersIds: [ID]!): String
         @guard(with: "sanctum")
         @field(resolver: "OrderMutator@deleteOrders")
 
@@ -60,4 +60,8 @@ extend type Mutation {
 
     searchOrders(terme: String): [Order]
         @paginate(builder: "App\\GraphQL\\Mutations\\OrderMutator@searchOrders")
+
+    createorderProductPDF(ids: [ID]): String
+        @guard(with: "sanctum")
+        @field(resolver: "OrderMutator@createorderProductPDF")
 }

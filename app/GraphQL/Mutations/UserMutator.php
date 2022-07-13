@@ -179,21 +179,16 @@ final class UserMutator
     {
         try {
             DB::beginTransaction();
-
-            foreach ($args['object'] as $order) {
-
-                $user = User::where('id', $order)->firstOrFail();
-
+            foreach ($args['usersIds'] as $user) {
+                $user = User::where('id', $user)->firstOrFail();
+                $user->products()->delete();
+                $user->clients()->delete();
                 $user->delete();
             }
-
             DB::commit();
-
             return 'All user are deleted successfuly';
         } catch (\Exception $e) {
-
             DB::rollback();
-
             throw new GraphQLException("can not delete this user is alerady deleted.", "error");
         }
     }

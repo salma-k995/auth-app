@@ -16,9 +16,9 @@ final class UpdateClientValidator extends Validator
         return [
             'first_name' => ['min:3'],
             'last_name' => ['min:3'],
-            'email' => ['email', 'unique:clients'],
+            'email' => ['email'],
             'phone' => ['min:8'],
-            'password' => ['min:8', 'confirmed']
+
         ];
     }
 
@@ -31,12 +31,8 @@ final class UpdateClientValidator extends Validator
             'last_name.min' => 'Le champs prénom doit compoter au minimum 3 caractéres.',
 
             'email.email' => 'Le champs email doit etre un email.',
-            'email.unique' => 'Email doit etre unique.',
 
             'phone.min' => 'Le champs phone doit compoter au minimum 8 caractéres.',
-
-            'password.min' => 'Le champs mot de passe doit compoter au minimum 8 caractéres.',
-            'password.confirmed' => 'Vérifier votre password.',
         ];
     }
 }

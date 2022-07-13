@@ -1,0 +1,39 @@
+type Reduction {
+    id: ID!
+    percent: Boolean
+    amount: Boolean
+    percent_value: Float
+    amount_value: Float
+    product: Product! @belongsTo
+}
+extend type Query {
+    reductions: [Reduction] @all @guard(with: "sanctum")
+}
+
+extend type Mutation {
+
+    createReduction(
+        id: ID!
+        percent: Boolean
+        amount: Boolean
+        percent_value: Float
+        amount_value: Float
+        clients:[ID]!
+    ): Reduction
+        @guard(with: "sanctum")
+        @field(resolver: "ReductionMutator@createReduction")
+
+    updateReduction(
+        id: ID!
+        percent: Boolean
+        amount: Boolean
+        percent_value: Float
+        amount_value: Float
+    ): String
+        @guard(with: "sanctum")
+        @field(resolver: "ReductionMutator@updateReduction")
+
+    deleteReductions(reductionsids: [ID]!): String
+        @guard(with: "sanctum")
+        @field(resolver: "ReductionMutator@deleteReductions")
+}

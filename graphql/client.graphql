@@ -4,7 +4,6 @@ type Client {
     last_name: String!
     email: String!
     phone: String!
-    password: String!
     user: User! @belongsTo
 }
 
@@ -19,7 +18,7 @@ extend type Query {
 }
 
 extend type Mutation {
-    
+
     createClient(
         first_name: String!
         last_name: String!
@@ -41,7 +40,7 @@ extend type Mutation {
         @validator(class: "UpdateClientValidator")
         @field(resolver: "ClientMutator@updateClient")
 
-    deleteClients(object: [ID]!): String
+    deleteClients(clientsIds: [ID]!): String
         @guard(with: "sanctum")
         @field(resolver: "ClientMutator@deleteClients")
 

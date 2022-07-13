@@ -50,9 +50,10 @@ final class ClientMutator
 
             DB::beginTransaction();
 
-            foreach ($args['object'] as $client) {
+            foreach ($args['clientsIds'] as $client) {
 
                 $client = $user->clients->where('id', $client)->firstOrFail();
+                $client->orders()->delete();
 
                 $client->delete();
             }

@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Nuwave\Lighthouse\Support\Contracts\GraphQLContext;
 use Illuminate\Support\Facades\DB;
-
-use function Safe\error_log;
+use \Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\App;
 
 final class OrderMutator
 {
@@ -34,12 +34,33 @@ final class OrderMutator
 
         foreach ($args['products'] as $product) {
 
-            $order->products()->attach($product['id'], [
-                'quantity' => $product['quantity'],
-                'total_price' => $product['quantity'] * Product::find($product['id'])->price
-            ]);
-        }
+            $prod = Product::where('id', $product)->FirstOrFail();
+            $reductions = $prod->reductions;
 
+            if ($product['quantity'] <= $prod->quantity) {
+                foreach ($reductions as $reduction) {
+                    $reductionClientsIds = $reduction->clients()->pluck('clients.id')->toArray();
+
+                    if (in_array($args['client_id'], $reductionClientsIds)) {
+                        if ($reduction->percent_value != null) {
+                            $order->products()->attach($product['id'], [
+                                'quantity' => $product['quantity'],
+                                'total_price' => $product['quantity'] * Product::find($product['id'])->price - ($product['quantity'] * (Product::find($product['id'])->price * $reduction->percent_value / 100))
+                            ]);
+                        } else $order->products()->attach($product['id'], [
+                            'quantity' => $product['quantity'],
+                            'total_price' => $product['quantity'] * Product::find($product['id'])->price - $reduction->amount_value
+                        ]);
+                    } else  $order->products()->attach($product['id'], [
+                        'quantity' => $product['quantity'],
+                        'total_price' => $product['quantity'] * Product::find($product['id'])->price
+                    ]);
+                }
+                $product = $prod->update([
+                    'quantity' => $prod->quantity - $product['quantity']
+                ]);
+            } else  throw new GraphQLException("can not buy product is alerady deleted.", "error");
+        }
         return $order;
     }
 
@@ -60,24 +81,67 @@ final class OrderMutator
         foreach ($args['products'] as $product) {
 
             $product_availability = $order->products()->find($product['id']);
+            $prod = Product::where('id', $product)->FirstOrFail();
 
-            if (empty($product_availability)) {
+            $reductions = $prod->reductions;
+            if ($product['quantity'] <= $prod->quantity) {
+                error_log('rrrrrrrrrrr');
+                if (empty($product_availability)) {
 
-                $order->products()->attach($product['id'], [
-                    'quantity' => $product['quantity'],
-                    'total_price' => $product['quantity'] * Product::find($product['id'])->price
+                    if (count($reductions) != 0) {
+                        foreach ($reductions as $reduction) {
+
+                            $reductionClientsIds = $reductions->clients()->pluck('clients.id')->toArray();
+
+                            if (in_array($order->id, $reductionClientsIds)) {
+
+                                if ($reductions->percent_value != null) {
+                                    $order->products()->attach($product['id'], [
+                                        'quantity' => $product['quantity'],
+                                        'total_price' => $product['quantity'] * Product::find($product['id'])->price - ($product['quantity'] * (Product::find($product['id'])->price * $reduction->percent_value / 100))
+                                    ]);
+                                } else $order->products()->attach($product['id'], [
+                                    'quantity' => $product['quantity'],
+                                    'total_price' => $product['quantity'] * Product::find($product['id'])->price - $reductions->amount_value
+                                ]);
+                            }
+                        }
+                    } else  $order->products()->attach($product['id'], [
+                        'quantity' => $product['quantity'],
+                        'total_price' => $product['quantity'] * Product::find($product['id'])->price
+                    ]);
+                } else {
+                    if (count($reductions) != 0) {
+                        foreach ($reductions as $reduction) {
+                            if ($reduction->percent_value != null) {
+                                $order->products()
+                                    ->updateExistingPivot(
+                                        $product['id'],
+                                        [
+                                            'quantity' => $product['quantity'],
+                                            'total_price' => $product_availability->price * $product['quantity'] - ($product['quantity'] * ($product_availability->price * $reduction->percent_value / 100))
+                                        ]
+                                    );
+                            } else  $order->products()
+                                ->updateExistingPivot(
+                                    $product['id'],
+                                    [
+                                        'quantity' => $product['quantity'],
+                                        'total_price' => $product_availability->price * $product['quantity'] - $reduction->amount_value
+                                    ]
+                                );
+                        }
+                    } else   $order->products()->attach($product['id'], [
+                        'quantity' => $product['quantity'],
+                        'total_price' => $product['quantity'] * Product::find($product['id'])->price
+                    ]);
+                }
+                $product = $prod->update([
+                    'quantity' => $prod->quantity - $product['quantity']
                 ]);
-            } else {
-                $order->products()
-                    ->updateExistingPivot(
-                        $product['id'],
-                        [
-                            'quantity' => $product['quantity'],
-                            'total_price' => $product_availability->price * $product['quantity']
-                        ]
-                    );
             }
         }
+
         return $order;
     }
 
@@ -89,9 +153,10 @@ final class OrderMutator
 
             DB::beginTransaction();
 
-            foreach ($args['object'] as $order) {
-                $order = $user->orders->where('id', $order)->firstOrFail();
+            foreach ($args['ordersIds'] as $order) {
 
+                $order = $user->orders->where('id', $order)->firstOrFail();
+                $order->products()->detach();
                 $order->delete();
             }
 
@@ -144,5 +209,33 @@ final class OrderMutator
         $orders = Order::where('reference', 'LIKE', '%' . $args['terme'] . '%')->orWhere('satus',   'LIKE', '%' . $args['terme'] . '%');
 
         return $orders;
+    }
+
+
+    public function createorderProductPDF($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+
+        $user = $context->request()->user();
+        $pages = [];
+        if (array_key_exists('ids', $args)) {
+            foreach ($args['ids'] as $key => $order_id) {
+                $order = $user->orders()->where('id', $order_id)->firstOrFail();
+                $pages[] = view('pdf.orderProductPDF')->with(compact('order'));
+            }
+        } else {
+            $orders = $user->orders()->get();
+            error_log($orders);
+            foreach ($orders as $key => $order) {
+                $order = $user->orders()->where('id', $order->id)->first();
+                $pages[] = view('pdf.orderProductPDF')->with(compact('order'));
+            }
+        }
+
+        $pdf = App::make('dompdf.wrapper');
+        $pdf = $pdf->loadView('pdf.index', ['pages' => $pages]);
+
+        Storage::put('public/pdf/orderProducts.pdf', $pdf->output());
+
+        return env('APP_URL') . "/storage/pdf/" . 'orderProducts.pdf';
     }
 }

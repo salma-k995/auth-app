@@ -18,7 +18,7 @@ final class RegisterClientValidator extends Validator
             'last_name' => ['required', 'min:3'],
             'email' => ['required', 'email', 'unique:clients'],
             'phone' => ['required', 'min:8'],
-            'password' => ['required', 'min:8', 'confirmed']
+            
         ];
     }
 
@@ -40,9 +40,7 @@ final class RegisterClientValidator extends Validator
             'phone.required' => 'Le champs phone est obligatoire.',
             'phone.min' => 'Le champs phone doit compoter au minimum 8 caractéres.',
 
-            'password.required' => 'Le champs mot de passe est obligatoire.',
-            'password.min' => 'Le champs mot de passe doit compoter au minimum 8 caractéres.',
-            'password.confirmed' => 'Vérifier votre password.',
+
         ];
     }
 }

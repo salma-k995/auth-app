@@ -3,13 +3,14 @@ type Product {
     name: String!
     description: String!
     price: String!
+    quantity: Float
     user: User! @belongsTo
     orders: [Order!]! @belongsToMany
     image_url: String
+    reductions: [Reduction!]! @belongsToMany
 }
 
 extend type Query {
-
     products(orderBy: _ @orderBy(columns: ["created_at"])): [Product]!
         @paginate(model: "Product")
         @guard(with: "sanctum")
@@ -22,11 +23,11 @@ extend type Query {
 }
 
 extend type Mutation {
-    
     createProduct(
         name: String
         description: String
-        price: String!
+        price: Float!
+        quantity: Float
         url: Upload!
     ): Product
         @guard(with: "sanctum")
@@ -38,20 +39,20 @@ extend type Mutation {
         name: String
         description: String
         price: Float
-        url: Upload!
+        url: Upload
     ): String
         @guard(with: "sanctum")
         @validator(class: "UpdateProductValidator")
         @field(resolver: "ProductMutator@updateProduct")
 
-    deleteProducts(object: [ID]!): String
+    deleteProducts(productsIds: [ID]!): String
         @guard(with: "sanctum")
         @field(resolver: "ProductMutator@deleteProducts")
 
     exportProducts(ids: [ID]): String
         @field(resolver: "ProductMutator@exportProducts")
 
-    searchProducts(terme:String): [Product]
+    searchProducts(terme: String): [Product]
         @paginate(
             builder: "App\\GraphQL\\Mutations\\ProductMutator@searchProducts"
         )
