@@ -67,7 +67,6 @@ final class ProductMutator
             foreach ($args['productsIds'] as $product) {
 
                 $product = $user->products->where('id', $product)->firstOrFail();
-                //  error_log($product);
                 $product->orders()->delete();
                 $product->reductions()->delete();
                 $product->delete();

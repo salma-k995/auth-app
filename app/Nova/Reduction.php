@@ -2,34 +2,32 @@
 
 namespace App\Nova;
 
-use Laravel\Nova\Fields\BelongsTo;
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\BelongsToMany;
-use Laravel\Nova\Fields\Currency;
-use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Number;
-use Laravel\Nova\Fields\Status;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Vyuldashev\NovaMoneyField\Money;
+use Nette\Utils\Floats;
+use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean as LogicalBoolean;
+use PhpParser\Node\Expr\Cast\Bool_;
 
-class Order extends Resource
+class Reduction extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = \App\Models\Order::class;
-    // public static $title = 'first_name';
+    public static $model = \App\Models\Reduction::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'first_name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -51,29 +49,23 @@ class Order extends Resource
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            Text::make('reference')
-                ->sortable()
-                ->rules('required', 'max:255'),
+            Boolean::make('percent'),
 
-            Status::make('Status')
-                ->loadingWhen(['waiting', 'running'])
-                ->failedWhen(['failed']),
+            Boolean::make('amount'),
 
-            BelongsTo::make('Client', 'client', 'App\Nova\Client'),
+            Number::make('amount_value')->min(1)->max(1000)->step(0.01),
 
-            HasMany::make('OrderHistories','orderHistories','App\Nova\orderHistory'),
+            Number::make('percent_value')->min(1)->max(1000)->step(0.01),
 
-            BelongsToMany::make('Product', 'products', 'App\Nova\Product')
-                ->fields(function ($request, $relatedModel) {
-                    return [
-                        Money::make('Total price', 'TND'),
-                        Number::make('Quantity', 'quantity'),
-                    ];
-                }),
+            BelongsTo::make('Product', 'product', 'App\Nova\Product'),
+            
+            BelongsToMany::make('Client', 'clients', 'App\Nova\Client')
+
         ];
     }
 
     /**
+     *
      * Get the cards available for the request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -115,10 +107,5 @@ class Order extends Resource
     public function actions(Request $request)
     {
         return [];
-    }
-
-    public function title()
-    {
-        return $this->first_name;
     }
 }

@@ -36,9 +36,12 @@ final class OrderMutator
 
             $prod = Product::where('id', $product)->FirstOrFail();
             $reductions = $prod->reductions;
+         //   error_log( $reductions);
 
-            if ($product['quantity'] <= $prod->quantity) {
+            if ( count($reductions ) !=0  && $product['quantity'] <= $prod->quantity) {
+
                 foreach ($reductions as $reduction) {
+
                     $reductionClientsIds = $reduction->clients()->pluck('clients.id')->toArray();
 
                     if (in_array($args['client_id'], $reductionClientsIds)) {
@@ -56,10 +59,18 @@ final class OrderMutator
                         'total_price' => $product['quantity'] * Product::find($product['id'])->price
                     ]);
                 }
-                $product = $prod->update([
-                    'quantity' => $prod->quantity - $product['quantity']
-                ]);
-            } else  throw new GraphQLException("can not buy product is alerady deleted.", "error");
+
+            } else if ($product['quantity'] <= $prod->quantity  ) {
+                $order->products()->attach($product['id'], [
+                'quantity' => $product['quantity'],
+                'total_price' => $product['quantity'] * Product::find($product['id'])->price
+            ]);
+        }
+        else throw new GraphQLException("can not add this order .", "error");
+        $product = $prod->update([
+            'quantity' => $prod->quantity - $product['quantity']
+        ]);
+
         }
         return $order;
     }
@@ -85,7 +96,7 @@ final class OrderMutator
 
             $reductions = $prod->reductions;
             if ($product['quantity'] <= $prod->quantity) {
-                error_log('rrrrrrrrrrr');
+
                 if (empty($product_availability)) {
 
                     if (count($reductions) != 0) {
@@ -150,7 +161,6 @@ final class OrderMutator
         $user = $context->request->user();
 
         try {
-
             DB::beginTransaction();
 
             foreach ($args['ordersIds'] as $order) {
@@ -214,7 +224,6 @@ final class OrderMutator
 
     public function createorderProductPDF($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
-
         $user = $context->request()->user();
         $pages = [];
         if (array_key_exists('ids', $args)) {

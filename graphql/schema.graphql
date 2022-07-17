@@ -13,6 +13,8 @@ scalar Upload
 #import order.graphql
 #import orderHistory.graphql
 #import reduction.graphql
+#import payment.graphql
+
 
 type Query
 

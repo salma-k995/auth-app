@@ -1,0 +1,31 @@
+type Payment {
+    id: ID!
+    amount: Float!
+    order: Order! @belongsTo
+    client: Client! @belongsTo
+    user: User! @belongsTo
+}
+
+enum PaymentType {
+    CASH
+    CHEQUE
+    BANKTRANSFER
+    TPE
+}
+
+extend type Query {
+    
+    payments(orderBy: _ @orderBy(columns: ["created_at"])): [Payment]!
+        @paginate(model: "Payment")
+        @guard(with: "sanctum")
+
+    showPayment(id: ID!): Payment
+        @guard(with: "sanctum")
+        @field(resolver: "PaymentQueries@showPayment")
+}
+
+extend type Mutation {
+    createPayment(order_id: ID!, payment_method: PaymentType): Payment
+        @guard(with: "sanctum")
+        @field(resolver: "PaymentMutator@createPayment")
+}

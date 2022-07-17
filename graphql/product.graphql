@@ -8,6 +8,13 @@ type Product {
     orders: [Order!]! @belongsToMany
     image_url: String
     reductions: [Reduction!]! @belongsToMany
+    pivot: ProductPivot
+}
+
+type ProductPivot {
+  
+    quantity: Float
+    total_price:Float
 }
 
 extend type Query {

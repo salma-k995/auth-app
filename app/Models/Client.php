@@ -46,4 +46,8 @@ class Client extends Authenticatable
     {
         return $this->belongsToMany(Reduction::class)->withPivot(['reduction_id', 'client_id']);
     }
+    public function payments(): hasMany
+    {
+        return $this->hasMany(Paymentt::class);
+    }
 }

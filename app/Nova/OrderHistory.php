@@ -2,34 +2,27 @@
 
 namespace App\Nova;
 
-use Laravel\Nova\Fields\BelongsTo;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsToMany;
-use Laravel\Nova\Fields\Currency;
-use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\ID;
-use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Status;
-use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Vyuldashev\NovaMoneyField\Money;
 
-class Order extends Resource
+class OrderHistory extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = \App\Models\Order::class;
-    // public static $title = 'first_name';
+    public static $model = \App\Models\OrderHistory::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'first_name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -51,25 +44,11 @@ class Order extends Resource
         return [
             ID::make(__('ID'), 'id')->sortable(),
 
-            Text::make('reference')
-                ->sortable()
-                ->rules('required', 'max:255'),
-
             Status::make('Status')
-                ->loadingWhen(['waiting', 'running'])
-                ->failedWhen(['failed']),
+            ->loadingWhen(['INPROGRESS'])
+            ->failedWhen(['PENDING']),
 
-            BelongsTo::make('Client', 'client', 'App\Nova\Client'),
-
-            HasMany::make('OrderHistories','orderHistories','App\Nova\orderHistory'),
-
-            BelongsToMany::make('Product', 'products', 'App\Nova\Product')
-                ->fields(function ($request, $relatedModel) {
-                    return [
-                        Money::make('Total price', 'TND'),
-                        Number::make('Quantity', 'quantity'),
-                    ];
-                }),
+            BelongsTo::make('Order', 'order', 'App\Nova\Order'),
         ];
     }
 
@@ -115,10 +94,5 @@ class Order extends Resource
     public function actions(Request $request)
     {
         return [];
-    }
-
-    public function title()
-    {
-        return $this->first_name;
     }
 }
