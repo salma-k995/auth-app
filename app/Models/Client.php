@@ -48,6 +48,6 @@ class Client extends Authenticatable
     }
     public function payments(): hasMany
     {
-        return $this->hasMany(Paymentt::class);
+        return $this->hasMany(Payment::class);
     }
 }

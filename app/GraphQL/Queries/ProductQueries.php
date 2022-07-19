@@ -17,6 +17,18 @@ final class ProductQueries
         // TODO implement the resolver
     }
 
+    public function getAllProducts($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $user = $context->request->user();
+
+        if (!empty($args['name']))
+            $products = $user->products()->where('name', 'LIKE', '%' . $args['name'] . '%')->get();
+
+        else $products = $user->products;
+
+        return $products;
+    }
+
     public function showProduct($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();

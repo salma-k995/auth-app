@@ -19,6 +19,18 @@ final class ClientQueries
         // TODO implement the resolver
     }
 
+
+    public function getAllClients($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
+    {
+        $user = $context->request->user();
+
+        if (!empty($args['first_name']))
+            $clients = $user->clients()->where('first_name', 'LIKE', '%' . $args['first_name'] . '%')->get();
+
+        else $clients = $user->clients;
+
+        return $clients;
+    }
     public function showClient($rootValue, array $args, GraphQLContext $context, ResolveInfo $resolveInfo)
     {
         $user = $context->request->user();

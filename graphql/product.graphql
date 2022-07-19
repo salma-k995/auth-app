@@ -12,9 +12,8 @@ type Product {
 }
 
 type ProductPivot {
-  
     quantity: Float
-    total_price:Float
+    total_price: Float
 }
 
 extend type Query {
@@ -22,11 +21,14 @@ extend type Query {
         @paginate(model: "Product")
         @guard(with: "sanctum")
 
+    getAllProducts(name: String): [Product]!
+        @guard(with: "sanctum")
+        @field(resolver: "ProductQueries@getAllProducts")
+
     showProduct(id: ID!): Product
         @guard(with: "sanctum")
         @field(resolver: "ProductQueries@showProduct")
 
-    #  productById(id: ID! @eq): Product @find @guard(with: "sanctum")
 }
 
 extend type Mutation {

@@ -12,13 +12,16 @@ extend type Query {
         @guard(with: "sanctum")
         @paginate(model: "Client")
 
+    getAllClients(first_name: String): [Client]!
+        @guard(with: "sanctum")
+        @field(resolver: "ClientQueries@getAllClients")
+
     showClient(id: ID!): Client
         @guard(with: "sanctum")
         @field(resolver: "ClientQueries@showClient")
 }
 
 extend type Mutation {
-
     createClient(
         first_name: String!
         last_name: String!

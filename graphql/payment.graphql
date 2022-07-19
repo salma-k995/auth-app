@@ -14,7 +14,6 @@ enum PaymentType {
 }
 
 extend type Query {
-    
     payments(orderBy: _ @orderBy(columns: ["created_at"])): [Payment]!
         @paginate(model: "Payment")
         @guard(with: "sanctum")
@@ -22,10 +21,18 @@ extend type Query {
     showPayment(id: ID!): Payment
         @guard(with: "sanctum")
         @field(resolver: "PaymentQueries@showPayment")
+
+    showClientPayments(client_id:ID!): [Payment]!
+        @guard(with: "sanctum")
+        @field(resolver: "PaymentQueries@showClientPayments")
 }
 
 extend type Mutation {
     createPayment(order_id: ID!, payment_method: PaymentType): Payment
         @guard(with: "sanctum")
         @field(resolver: "PaymentMutator@createPayment")
+
+    updatePayment(id:ID ,payment_method: PaymentType): String
+        @guard(with: "sanctum")
+        @field(resolver: "PaymentMutator@updatePayment")
 }
