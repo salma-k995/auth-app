@@ -2,18 +2,35 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "acme/analytics": "*",
+        "algolia/algoliasearch-client-php": "^3.2",
+        "barryvdh/laravel-dompdf": "^1.0",
+        "digital-creative/collapsible-resource-manager": "^1.4",
         "doctrine/dbal": "^3.3",
+        "dyrynda/laravel-cascade-soft-deletes": "^4.2",
+        "example/miami-ice": "*",
+        "gregoriohc/laravel-nova-theme-responsive": "^0.8.1",
         "guzzlehttp/guzzle": "^7.2",
+        "http-interop/http-factory-guzzle": "^1.2",
         "laravel/framework": "^9.11",
+        "laravel/nova": "~3.0",
         "laravel/sanctum": "^2.15",
+        "laravel/scout": "^9.4",
         "laravel/tinker": "^2.7",
+        "maatwebsite/excel": "^3.1",
+        "meilisearch/meilisearch-php": "^0.23.3",
         "mll-lab/laravel-graphql-playground": "^2.6",
         "nuwave/lighthouse": "^5.53",
-        "laravel/nova": "~4.0"
+        "psr/simple-cache": "^1.0",
+        "pusher/pusher-php-server": "^7.0",
+        "vyuldashev/nova-money-field": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
@@ -66,8 +83,14 @@
         {
             "type": "composer",
             "url": "https://nova.laravel.com"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/Analytics"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/MiamiIce"
         }
     ]
-
-
 }
